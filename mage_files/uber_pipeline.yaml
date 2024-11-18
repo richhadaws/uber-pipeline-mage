@@ -1,0 +1,36 @@
+blocks:
+  - name: load_uber_data
+    type: data_loader
+    source: uber_data_loader.py
+    input: None
+    output: uber_raw_data
+
+  - name: transform_uber_data
+    type: transformer
+    source: uber_data_transformer.py
+    input: uber_raw_data
+    output: uber_transformed_data
+    
+  - name: validate_data
+    type: transformer
+    source: uber_data_transformer.py
+    function: validate_transformed_data
+    input: uber_transformed_data
+    output: uber_validated_data
+
+  - name: export_data
+    type: data_exporter
+    source: uber_data_exporter.py
+    input: uber_validated_data
+    output: None
+
+schedules:
+  - name: daily_uber_pipeline
+    schedule_type: time
+    schedule_interval: '@daily'
+    start_time: 2024-01-01 00:00:00
+    blocks:
+      - load_uber_data
+      - transform_uber_data
+      - validate_data
+      - export_data
