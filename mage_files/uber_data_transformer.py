@@ -38,10 +38,8 @@ def transform_data(df: DataFrame, *args, **kwargs) -> DataFrame:
         # dim_location
         dim_location = pd.DataFrame({
             'location_id': range(len(df)),
-            'pickup_latitude': df['pickup_latitude'],
-            'pickup_longitude': df['pickup_longitude'],
-            'dropoff_latitude': df['dropoff_latitude'],
-            'dropoff_longitude': df['dropoff_longitude']
+            'pickup_location_id': df['pickup_location_id'],
+            'dropoff_location_id': df['dropoff_location_id']
         })
         
         # dim_payment
@@ -62,7 +60,8 @@ def transform_data(df: DataFrame, *args, **kwargs) -> DataFrame:
         fact_trips = pd.DataFrame({
             'trip_id': range(len(df)),
             'datetime_id': dim_datetime['datetime_id'],
-            'location_id': dim_location['location_id'],
+            'pickup_location_id': df['pickup_location_id'],
+            'dropoff_location_id': df['dropoff_location_id'],
             'payment_id': df['payment_type'].map(dict(zip(dim_payment['payment_name'], dim_payment['payment_id']))),
             'passenger_id': df['passenger_count'].map(dict(zip(dim_passenger['passenger_count'], dim_passenger['passenger_id']))),
             'trip_distance': df['trip_distance'],
@@ -103,7 +102,7 @@ def validate_transformed_data(df: DataFrame, *args, **kwargs) -> DataFrame:
     Validate the transformed data
     """
     # Validate no null values in key fields
-    key_fields = ['trip_id', 'datetime_id', 'location_id', 'payment_id', 'passenger_id']
+    key_fields = ['trip_id', 'datetime_id', 'pickup_location_id', 'dropoff_location_id', 'payment_id', 'passenger_id']
     null_counts = df[key_fields].isnull().sum()
     if null_counts.any():
         raise ValueError(f"Found null values in key fields: {null_counts[null_counts > 0].to_dict()}")
